@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import { useParams } from 'next/navigation';
 import Link from 'next/link';
-import { getOperationsCase } from '@/lib/contract-service';
+import { getFullCase } from '@/lib/contract-service';
 import { getTxHash } from '@/lib/tx-store';
 import type { FullCaseData } from '@/lib/types';
 import { VerdictChamber } from '@/components/pressure-deck';
@@ -15,7 +15,7 @@ export default function VerdictPage() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    getOperationsCase(caseId).then(setData).catch(() => {}).finally(() => setLoading(false));
+    getFullCase(Number(caseId)).then(setData).catch(() => {}).finally(() => setLoading(false));
   }, [caseId]);
 
   const txHash = getTxHash(caseId, 'review') ?? undefined;
@@ -26,7 +26,7 @@ export default function VerdictPage() {
         <Link href={`/ops/${caseId}`} className="text-muted-steel hover:text-text-secondary"><ArrowLeft className="w-4 h-4" /></Link>
         <Shield className="w-4 h-4 text-signal-amber" />
         <span className="font-display text-sm font-bold text-text-primary">Ops Verdikt</span>
-        <span className="font-mono text-[10px] text-muted-steel">{caseId}</span>
+        <span className="font-mono text-[10px] text-muted-steel">#{caseId}</span>
       </header>
       <div className="max-w-4xl mx-auto p-6">
         {loading && <div className="text-center py-12"><Loader2 className="w-6 h-6 text-signal-amber animate-spin mx-auto" /></div>}
