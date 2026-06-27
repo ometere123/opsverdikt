@@ -127,7 +127,7 @@ export async function listAllCases(): Promise<any[]> {
   if (count === 0) return [];
 
   const summaries = [];
-  for (let i = 0; i < count; i++) {
+  for (let i = 1; i <= count; i++) {
     try {
       const summary = await getCaseSummary(i);
       summaries.push({ ...summary, case_id: i });

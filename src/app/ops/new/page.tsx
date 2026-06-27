@@ -68,9 +68,10 @@ export default function NewCasePage() {
     setSubmitting(true); setError(null);
     try {
       const currentCount = await getCaseCount();
+      const newCaseId = currentCount + 1;
       const hash = await createCase(address, form);
-      if (hash) saveTxHash(String(currentCount), 'case', hash as string);
-      router.push(`/ops/${currentCount}`);
+      if (hash) saveTxHash(String(newCaseId), 'case', hash as string);
+      router.push(`/ops/${newCaseId}`);
     } catch (e: unknown) {
       setError(e instanceof Error ? e.message : 'Transaction failed');
     } finally { setSubmitting(false); }
