@@ -447,9 +447,10 @@ class OpsVerdiktContract(gl.Contract):
             })
 
         evidence_data = []
+        fetched_evidence = []
         for eid in evidence_id_list:
             e = self.evidence[u32(eid)]
-            evidence_data.append({
+            ev_entry = {
                 "evidence_id": eid,
                 "title": e.title,
                 "type": e.evidence_type,
@@ -458,9 +459,23 @@ class OpsVerdiktContract(gl.Contract):
                 "source_credibility": e.source_credibility,
                 "relevance": e.relevance,
                 "category": e.category,
-            })
+            }
+            evidence_data.append(ev_entry)
+
+            try:
+                web_content = gl.nondet.web.get(e.url)
+                fetched_text = str(web_content)[:1000]
+                fetched_evidence.append({"title": e.title, "url": e.url, "fetched_content": fetched_text})
+            except Exception:
+                fetched_evidence.append({"title": e.title, "url": e.url, "fetched_content": "[Could not fetch - URL may be unavailable]"})
 
         case_mem = gl.storage.copy_to_memory(case)
+
+        fetched_section = ""
+        if fetched_evidence:
+            fetched_section = "\n\nFETCHED EVIDENCE CONTENT (live data from URLs):\n"
+            for fe in fetched_evidence:
+                fetched_section += f"\n--- {fe['title']} ({fe['url']}) ---\n{fe['fetched_content']}\n"
 
         prompt = f"""You are an operational judgment engine evaluating a high-pressure operational decision case.
 
@@ -483,8 +498,9 @@ LABOR PLAN OPTIONS:
 
 EVIDENCE REFERENCES:
 {json.dumps(evidence_data, indent=2)}
-
+{fetched_section}
 Evaluate which labor plan is most defensible given the operational context, task urgency, evidence quality, and risk factors.
+Do not invent facts not present in the evidence. If evidence URLs could not be fetched, note reduced evidence quality.
 
 You MUST return a JSON object with exactly these keys:
 {{
@@ -512,6 +528,16 @@ You MUST return a JSON object with exactly these keys:
 
         valid_plan_ids = plan_id_list
 
+        def _conf_band(c):
+            try:
+                c = int(c)
+            except (ValueError, TypeError):
+                return "medium"
+            if c >= 80: return "very_strong"
+            if c >= 60: return "strong"
+            if c >= 40: return "moderate"
+            return "low"
+
         def leader_fn():
             result = gl.nondet.exec_prompt(prompt, response_format="json")
             if not isinstance(result, dict):
@@ -530,35 +556,9 @@ You MUST return a JSON object with exactly these keys:
             if l_plan != v_plan:
                 return False
 
-            l_priority = str(leader_data.get("priority_level", "")).lower().strip()
-            v_priority = str(validator_data.get("priority_level", "")).lower().strip()
-            if l_priority != v_priority:
-                return False
-
-            l_sla = str(leader_data.get("sla_risk", "")).lower().strip()
-            v_sla = str(validator_data.get("sla_risk", "")).lower().strip()
-            if l_sla != v_sla:
-                return False
-
-            l_btn = str(leader_data.get("bottleneck_risk", "")).lower().strip()
-            v_btn = str(validator_data.get("bottleneck_risk", "")).lower().strip()
-            if l_btn != v_btn:
-                return False
-
-            l_exec = str(leader_data.get("execution_risk", "")).lower().strip()
-            v_exec = str(validator_data.get("execution_risk", "")).lower().strip()
-            if l_exec != v_exec:
-                return False
-
-            l_conf = leader_data.get("confidence", 50)
-            v_conf = validator_data.get("confidence", 50)
-            try:
-                l_conf = int(l_conf)
-                v_conf = int(v_conf)
-            except (ValueError, TypeError):
-                return False
-
-            if abs(l_conf - v_conf) > 10:
+            l_band = _conf_band(leader_data.get("confidence", 50))
+            v_band = _conf_band(validator_data.get("confidence", 50))
+            if l_band != v_band:
                 return False
 
             return True
