@@ -1,4 +1,4 @@
-# v0.2.18
+# v0.3.0
 # { "Depends": "py-genlayer:1jb45aa8ynh2a9c9xn3b7qqh8sm5q93hwfp7jqmwsfhh8jpz09h6" }
 
 from genlayer import *
@@ -147,6 +147,18 @@ VALID_QUALITY = ["high", "medium-high", "medium", "medium-low", "low"]
 VALID_CONTRADICTION = ["none", "low", "moderate", "high", "severe"]
 
 
+def _get_ids(map: TreeMap, key) -> list:
+    if key not in map:
+        return []
+    return json.loads(map[key])
+
+
+def _append_id(map: TreeMap, key, new_id: int) -> None:
+    ids = _get_ids(map, key)
+    ids.append(new_id)
+    map[key] = json.dumps(ids)
+
+
 class OpsVerdiktContract(gl.Contract):
     next_case_id: u32
     next_task_id: u32
@@ -160,11 +172,11 @@ class OpsVerdiktContract(gl.Contract):
     evidence: TreeMap[u32, EvidenceRecord]
     verdikts: TreeMap[u32, OpsVerdikt]
 
-    case_tasks: TreeMap[u32, DynArray[u32]]
-    case_plans: TreeMap[u32, DynArray[u32]]
-    case_evidence: TreeMap[u32, DynArray[u32]]
-    case_verdikts: TreeMap[u32, DynArray[u32]]
-    owner_cases: TreeMap[Address, DynArray[u32]]
+    case_tasks: TreeMap[u32, str]
+    case_plans: TreeMap[u32, str]
+    case_evidence: TreeMap[u32, str]
+    case_verdikts: TreeMap[u32, str]
+    owner_cases: TreeMap[Address, str]
 
     def __init__(self) -> None:
         self.next_case_id = u32(1)
@@ -172,8 +184,6 @@ class OpsVerdiktContract(gl.Contract):
         self.next_plan_id = u32(1)
         self.next_evidence_id = u32(1)
         self.next_verdikt_id = u32(1)
-
-    # ── WRITE METHODS ──────────────────────────────────────────────
 
     @gl.public.write
     def create_case(
@@ -221,9 +231,13 @@ class OpsVerdiktContract(gl.Contract):
         )
 
         self.cases[case_id] = case
+        self.case_tasks[case_id] = "[]"
+        self.case_plans[case_id] = "[]"
+        self.case_evidence[case_id] = "[]"
+        self.case_verdikts[case_id] = "[]"
 
         sender = gl.message.sender_address
-        self.owner_cases[sender].append(case_id)
+        _append_id(self.owner_cases, sender, int(case_id))
 
     @gl.public.write
     def add_task(
@@ -274,7 +288,7 @@ class OpsVerdiktContract(gl.Contract):
         )
 
         self.tasks[task_id] = task
-        self.case_tasks[case_id].append(task_id)
+        _append_id(self.case_tasks, case_id, int(task_id))
         case.task_count = u32(case.task_count + 1)
         if case.status == u32(0):
             case.status = u32(1)
@@ -325,7 +339,7 @@ class OpsVerdiktContract(gl.Contract):
         )
 
         self.plans[plan_id] = plan
-        self.case_plans[case_id].append(plan_id)
+        _append_id(self.case_plans, case_id, int(plan_id))
         case.plan_count = u32(case.plan_count + 1)
         if case.status == u32(0):
             case.status = u32(1)
@@ -375,7 +389,7 @@ class OpsVerdiktContract(gl.Contract):
         )
 
         self.evidence[eid] = rec
-        self.case_evidence[case_id].append(eid)
+        _append_id(self.case_evidence, case_id, int(eid))
         case.evidence_count = u32(case.evidence_count + 1)
         if case.status == u32(0):
             case.status = u32(1)
@@ -400,15 +414,15 @@ class OpsVerdiktContract(gl.Contract):
         case.status = u32(2)
         self.cases[case_id] = case
 
-        task_ids = self.case_tasks[case_id]
-        plan_ids = self.case_plans[case_id]
-        evidence_ids = self.case_evidence[case_id]
+        task_id_list = _get_ids(self.case_tasks, case_id)
+        plan_id_list = _get_ids(self.case_plans, case_id)
+        evidence_id_list = _get_ids(self.case_evidence, case_id)
 
         tasks_data = []
-        for tid in task_ids:
-            t = self.tasks[tid]
+        for tid in task_id_list:
+            t = self.tasks[u32(tid)]
             tasks_data.append({
-                "task_id": int(t.task_id),
+                "task_id": tid,
                 "title": t.title,
                 "type": t.task_type,
                 "department": t.department,
@@ -419,10 +433,10 @@ class OpsVerdiktContract(gl.Contract):
             })
 
         plans_data = []
-        for pid in plan_ids:
-            p = self.plans[pid]
+        for pid in plan_id_list:
+            p = self.plans[u32(pid)]
             plans_data.append({
-                "plan_id": int(p.plan_id),
+                "plan_id": pid,
                 "title": p.title,
                 "allocation_summary": p.allocation_summary,
                 "priority_task_order": p.priority_task_order,
@@ -433,10 +447,10 @@ class OpsVerdiktContract(gl.Contract):
             })
 
         evidence_data = []
-        for eid in evidence_ids:
-            e = self.evidence[eid]
+        for eid in evidence_id_list:
+            e = self.evidence[u32(eid)]
             evidence_data.append({
-                "evidence_id": int(e.evidence_id),
+                "evidence_id": eid,
                 "title": e.title,
                 "type": e.evidence_type,
                 "url": e.url,
@@ -496,7 +510,7 @@ You MUST return a JSON object with exactly these keys:
   "follow_up_needed": "<comma-separated follow-up items>"
 }}"""
 
-        valid_plan_ids = [int(p.plan_id) for p in [self.plans[pid] for pid in plan_ids]]
+        valid_plan_ids = plan_id_list
 
         def leader_fn():
             result = gl.nondet.exec_prompt(prompt, response_format="json")
@@ -596,13 +610,11 @@ You MUST return a JSON object with exactly these keys:
         )
 
         self.verdikts[vid] = verdikt
-        self.case_verdikts[case_id].append(vid)
+        _append_id(self.case_verdikts, case_id, int(vid))
 
         case = self.cases[case_id]
         case.status = u32(3)
         self.cases[case_id] = case
-
-    # ── VIEW METHODS ───────────────────────────────────────────────
 
     @gl.public.view
     def get_case(self, case_id: u32) -> str:
@@ -635,11 +647,12 @@ You MUST return a JSON object with exactly these keys:
 
     @gl.public.view
     def get_case_tasks(self, case_id: u32) -> str:
-        if case_id not in self.case_tasks:
+        task_id_list = _get_ids(self.case_tasks, case_id)
+        if not task_id_list:
             return "[]"
         result = []
-        for tid in self.case_tasks[case_id]:
-            t = self.tasks[tid]
+        for tid in task_id_list:
+            t = self.tasks[u32(tid)]
             result.append({
                 "task_id": int(t.task_id),
                 "case_id": int(t.case_id),
@@ -662,11 +675,12 @@ You MUST return a JSON object with exactly these keys:
 
     @gl.public.view
     def get_case_plans(self, case_id: u32) -> str:
-        if case_id not in self.case_plans:
+        plan_id_list = _get_ids(self.case_plans, case_id)
+        if not plan_id_list:
             return "[]"
         result = []
-        for pid in self.case_plans[case_id]:
-            p = self.plans[pid]
+        for pid in plan_id_list:
+            p = self.plans[u32(pid)]
             result.append({
                 "plan_id": int(p.plan_id),
                 "case_id": int(p.case_id),
@@ -687,11 +701,12 @@ You MUST return a JSON object with exactly these keys:
 
     @gl.public.view
     def get_case_evidence(self, case_id: u32) -> str:
-        if case_id not in self.case_evidence:
+        evidence_id_list = _get_ids(self.case_evidence, case_id)
+        if not evidence_id_list:
             return "[]"
         result = []
-        for eid in self.case_evidence[case_id]:
-            e = self.evidence[eid]
+        for eid in evidence_id_list:
+            e = self.evidence[u32(eid)]
             result.append({
                 "evidence_id": int(e.evidence_id),
                 "case_id": int(e.case_id),
@@ -712,11 +727,12 @@ You MUST return a JSON object with exactly these keys:
 
     @gl.public.view
     def get_case_verdikts(self, case_id: u32) -> str:
-        if case_id not in self.case_verdikts:
+        verdikt_id_list = _get_ids(self.case_verdikts, case_id)
+        if not verdikt_id_list:
             return "[]"
         result = []
-        for vid in self.case_verdikts[case_id]:
-            v = self.verdikts[vid]
+        for vid in verdikt_id_list:
+            v = self.verdikts[u32(vid)]
             result.append(self._verdikt_to_dict(v))
         return json.dumps(result)
 
@@ -729,12 +745,7 @@ You MUST return a JSON object with exactly these keys:
 
     @gl.public.view
     def get_owner_cases(self, owner: Address) -> str:
-        if owner not in self.owner_cases:
-            return "[]"
-        result = []
-        for cid in self.owner_cases[owner]:
-            result.append(int(cid))
-        return json.dumps(result)
+        return json.dumps(_get_ids(self.owner_cases, owner))
 
     @gl.public.view
     def get_case_count(self) -> u32:
@@ -757,8 +768,6 @@ You MUST return a JSON object with exactly these keys:
             "evidence_count": int(c.evidence_count),
             "owner": str(c.owner),
         })
-
-    # ── INTERNAL HELPERS ───────────────────────────────────────────
 
     def _verdikt_to_dict(self, v: OpsVerdikt) -> dict:
         return {
