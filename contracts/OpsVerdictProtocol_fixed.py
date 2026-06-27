@@ -212,7 +212,7 @@ class OpsVerdiktContract(gl.Contract):
             equipment_constraints=_trunc(equipment_constraints, 256),
             supervisor_notes=_trunc(supervisor_notes, 512),
             operational_hypothesis=_trunc(operational_hypothesis, 512),
-            owner=gl.message.sender_account,
+            owner=gl.message.sender_address,
             status=u32(0),
             created_at=_trunc(shift_start, 64),
             task_count=u32(0),
@@ -226,7 +226,7 @@ class OpsVerdiktContract(gl.Contract):
         self.case_evidence[case_id] = DynArray[u32]()
         self.case_verdikts[case_id] = DynArray[u32]()
 
-        sender = gl.message.sender_account
+        sender = gl.message.sender_address
         if sender not in self.owner_cases:
             self.owner_cases[sender] = DynArray[u32]()
         self.owner_cases[sender].append(case_id)
@@ -252,7 +252,7 @@ class OpsVerdiktContract(gl.Contract):
         if case_id not in self.cases:
             raise gl.UserError("Case not found")
         case = self.cases[case_id]
-        if gl.message.sender_account != case.owner:
+        if gl.message.sender_address != case.owner:
             raise gl.UserError("Not case owner")
         if case.task_count >= u32(20):
             raise gl.UserError("Max 20 tasks per case")
@@ -276,7 +276,7 @@ class OpsVerdiktContract(gl.Contract):
             delay_risk=_trunc(delay_risk, 256),
             safety_note=_trunc(safety_note, 256),
             status_at_submission=_trunc(status_at_submission, 32),
-            submitter=gl.message.sender_account,
+            submitter=gl.message.sender_address,
         )
 
         self.tasks[task_id] = task
@@ -305,7 +305,7 @@ class OpsVerdiktContract(gl.Contract):
         if case_id not in self.cases:
             raise gl.UserError("Case not found")
         case = self.cases[case_id]
-        if gl.message.sender_account != case.owner:
+        if gl.message.sender_address != case.owner:
             raise gl.UserError("Not case owner")
         if case.plan_count >= u32(5):
             raise gl.UserError("Max 5 plans per case")
@@ -327,7 +327,7 @@ class OpsVerdiktContract(gl.Contract):
             sla_assumptions=_trunc(sla_assumptions, 256),
             safety_assumptions=_trunc(safety_assumptions, 256),
             failure_conditions=_trunc(failure_conditions, 256),
-            submitter=gl.message.sender_account,
+            submitter=gl.message.sender_address,
         )
 
         self.plans[plan_id] = plan
@@ -355,7 +355,7 @@ class OpsVerdiktContract(gl.Contract):
         if case_id not in self.cases:
             raise gl.UserError("Case not found")
         case = self.cases[case_id]
-        if gl.message.sender_account != case.owner:
+        if gl.message.sender_address != case.owner:
             raise gl.UserError("Not case owner")
         if case.evidence_count >= u32(20):
             raise gl.UserError("Max 20 evidence per case")
@@ -377,7 +377,7 @@ class OpsVerdiktContract(gl.Contract):
             related_plan_ids=_trunc(related_plan_ids, 256),
             category=_trunc(category, 32),
             submitted_at=_trunc(url, 64),
-            submitter=gl.message.sender_account,
+            submitter=gl.message.sender_address,
         )
 
         self.evidence[eid] = rec
@@ -392,7 +392,7 @@ class OpsVerdiktContract(gl.Contract):
         if case_id not in self.cases:
             raise gl.UserError("Case not found")
         case = self.cases[case_id]
-        if gl.message.sender_account != case.owner:
+        if gl.message.sender_address != case.owner:
             raise gl.UserError("Not case owner")
         if case.task_count < u32(1):
             raise gl.UserError("At least 1 task required")
