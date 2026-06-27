@@ -1,4 +1,4 @@
-export const CONTRACT_ADDRESS = '0xE53eD628c828f24C189Ef30A09858A7Fb691e5ce' as const;
+export const CONTRACT_ADDRESS = '0x3a56191597D0cFD8b196699e5c4A73d09dC68a32' as const;
 
 export const STUDIONET_CONFIG = {
   chainId: 61999,
