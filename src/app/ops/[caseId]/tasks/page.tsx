@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
+import { useAccount } from 'wagmi';
 import Link from 'next/link';
 import { addTask } from '@/lib/contract-service';
 import { saveTxHash } from '@/lib/tx-store';
@@ -20,6 +21,7 @@ const emptyTask = { title: '', task_type: '', department: '', deadline: '', sla_
 export default function TasksPage() {
   const { caseId } = useParams() as { caseId: string };
   const router = useRouter();
+  const { address, isConnected } = useAccount();
   const [tasks, setTasks] = useState([{ ...emptyTask }]);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -32,11 +34,12 @@ export default function TasksPage() {
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
+    if (!isConnected || !address) { setError('Connect wallet to continue'); return; }
     setSubmitting(true); setError(null);
     try {
       for (let i = 0; i < tasks.length; i++) {
         setProgress(i + 1);
-        const hash = await addTask({ case_id: Number(caseId), ...tasks[i] });
+        const hash = await addTask(address, { case_id: Number(caseId), ...tasks[i] });
         if (i === 0 && hash) saveTxHash(caseId, 'tasks', hash as string);
       }
       router.push(`/ops/${caseId}`);

@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
+import { useAccount } from 'wagmi';
 import Link from 'next/link';
 import { addLaborPlan } from '@/lib/contract-service';
 import { saveTxHash } from '@/lib/tx-store';
@@ -18,6 +19,7 @@ const emptyPlan = { title: '', allocation_summary: '', workers_by_function: '', 
 export default function PlansPage() {
   const { caseId } = useParams() as { caseId: string };
   const router = useRouter();
+  const { address, isConnected } = useAccount();
   const [plans, setPlans] = useState([{ ...emptyPlan }]);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -30,11 +32,12 @@ export default function PlansPage() {
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
+    if (!isConnected || !address) { setError('Connect wallet to continue'); return; }
     setSubmitting(true); setError(null);
     try {
       for (let i = 0; i < plans.length; i++) {
         setProgress(i + 1);
-        const hash = await addLaborPlan({ case_id: Number(caseId), ...plans[i] });
+        const hash = await addLaborPlan(address, { case_id: Number(caseId), ...plans[i] });
         if (i === 0 && hash) saveTxHash(caseId, 'plans', hash as string);
       }
       router.push(`/ops/${caseId}`);

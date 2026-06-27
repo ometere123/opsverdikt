@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { useAccount } from 'wagmi';
 import Link from 'next/link';
 import { createCase, getCaseCount } from '@/lib/contract-service';
 import { saveTxHash } from '@/lib/tx-store';
@@ -34,6 +35,7 @@ const PRESSURE_OPTIONS = [
 
 export default function NewCasePage() {
   const router = useRouter();
+  const { address, isConnected } = useAccount();
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -59,13 +61,14 @@ export default function NewCasePage() {
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
+    if (!isConnected || !address) { setError('Connect wallet to continue'); return; }
     if (!form.title || !form.facility_name || !form.business_objective) {
       setError('Fill all required fields'); return;
     }
     setSubmitting(true); setError(null);
     try {
       const currentCount = await getCaseCount();
-      const hash = await createCase(form);
+      const hash = await createCase(address, form);
       if (hash) saveTxHash(String(currentCount), 'case', hash as string);
       router.push(`/ops/${currentCount}`);
     } catch (e: unknown) {

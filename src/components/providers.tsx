@@ -5,6 +5,7 @@ import { WagmiProvider } from 'wagmi';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { wagmiConfig } from '@/lib/wallet-config';
 import { StudioNetAutoSwitch } from '@/components/studionet-auto-switch';
+import { DebugPanel } from '@/components/pressure-deck/debug-panel';
 import '@rainbow-me/rainbowkit/styles.css';
 
 const queryClient = new QueryClient();
@@ -22,6 +23,7 @@ export function Providers({ children }: { children: React.ReactNode }) {
           })}
         >
           <StudioNetAutoSwitch />
+          <DebugPanel />
           {children}
         </RainbowKitProvider>
       </QueryClientProvider>

@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
+import { useAccount } from 'wagmi';
 import Link from 'next/link';
 import { addEvidence } from '@/lib/contract-service';
 import { saveTxHash } from '@/lib/tx-store';
@@ -19,6 +20,7 @@ const emptyEvidence = { title: '', evidence_type: '', url: '', evidence_hash: ''
 export default function EvidencePage() {
   const { caseId } = useParams() as { caseId: string };
   const router = useRouter();
+  const { address, isConnected } = useAccount();
   const [items, setItems] = useState([{ ...emptyEvidence }]);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -31,11 +33,12 @@ export default function EvidencePage() {
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
+    if (!isConnected || !address) { setError('Connect wallet to continue'); return; }
     setSubmitting(true); setError(null);
     try {
       for (let i = 0; i < items.length; i++) {
         setProgress(i + 1);
-        const hash = await addEvidence({ case_id: Number(caseId), ...items[i] });
+        const hash = await addEvidence(address, { case_id: Number(caseId), ...items[i] });
         if (i === 0 && hash) saveTxHash(caseId, 'evidence', hash as string);
       }
       router.push(`/ops/${caseId}`);

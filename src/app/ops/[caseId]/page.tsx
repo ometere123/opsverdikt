@@ -2,6 +2,7 @@
 
 import { useEffect, useState, useCallback } from 'react';
 import { useParams } from 'next/navigation';
+import { useAccount } from 'wagmi';
 import Link from 'next/link';
 import { getFullCase, requestVerdikt } from '@/lib/contract-service';
 import { saveTxHash } from '@/lib/tx-store';
@@ -34,6 +35,7 @@ function buildZones(data: FullCaseData): ZoneData[] {
 export default function CaseDetailPage() {
   const params = useParams();
   const caseId = Number(params.caseId);
+  const { address, isConnected } = useAccount();
   const [data, setData] = useState<FullCaseData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -59,9 +61,10 @@ export default function CaseDetailPage() {
   }, [polling, loadCase]);
 
   async function handleRequestReview() {
+    if (!isConnected || !address) { setError('Connect wallet to continue'); return; }
     setReviewing(true);
     try {
-      const hash = await requestVerdikt(caseId);
+      const hash = await requestVerdikt(address, caseId);
       if (hash) saveTxHash(String(caseId), 'review', hash as string);
       setPolling(true);
       await loadCase();

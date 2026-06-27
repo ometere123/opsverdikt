@@ -1,14 +1,14 @@
 import { readContract, writeContract } from './genlayer-client';
 import type { FullCaseData } from './types';
 
-export async function createCase(params: {
+export async function createCase(account: `0x${string}`, params: {
   title: string; facility_name: string; facility_type: string;
   shift_name: string; business_objective: string; pressure_level: number;
   shift_start: string; shift_end: string; decision_deadline: string;
   available_workers: number; worker_skill_summary: string; equipment_constraints: string;
   supervisor_notes: string; operational_hypothesis: string;
 }) {
-  return writeContract('create_case', [
+  return writeContract(account, 'create_case', [
     params.title, params.facility_name, params.facility_type,
     params.shift_name, params.business_objective, params.pressure_level,
     params.shift_start, params.shift_end, params.decision_deadline,
@@ -17,13 +17,13 @@ export async function createCase(params: {
   ]);
 }
 
-export async function addTask(params: {
+export async function addTask(account: `0x${string}`, params: {
   case_id: number; title: string; task_type: string; department: string;
   deadline: string; sla_impact: string; customer_priority: string;
   estimated_effort: string; required_skill: string; required_equipment: string;
   dependency: string; delay_risk: string; safety_note: string; status_at_submission: string;
 }) {
-  return writeContract('add_task', [
+  return writeContract(account, 'add_task', [
     params.case_id, params.title, params.task_type, params.department,
     params.deadline, params.sla_impact, params.customer_priority,
     params.estimated_effort, params.required_skill, params.required_equipment,
@@ -31,13 +31,13 @@ export async function addTask(params: {
   ]);
 }
 
-export async function addLaborPlan(params: {
+export async function addLaborPlan(account: `0x${string}`, params: {
   case_id: number; title: string; allocation_summary: string;
   workers_by_function: string; priority_task_order: string; tasks_to_delay: string;
   expected_upside: string; operational_risks: string; bottleneck_assumptions: string;
   sla_assumptions: string; safety_assumptions: string; failure_conditions: string;
 }) {
-  return writeContract('add_labor_plan', [
+  return writeContract(account, 'add_labor_plan', [
     params.case_id, params.title, params.allocation_summary,
     params.workers_by_function, params.priority_task_order, params.tasks_to_delay,
     params.expected_upside, params.operational_risks, params.bottleneck_assumptions,
@@ -45,20 +45,20 @@ export async function addLaborPlan(params: {
   ]);
 }
 
-export async function addEvidence(params: {
+export async function addEvidence(account: `0x${string}`, params: {
   case_id: number; title: string; evidence_type: string; url: string;
   evidence_hash: string; source_name: string; source_credibility: string;
   relevance: string; related_task_ids: string; related_plan_ids: string; category: string;
 }) {
-  return writeContract('add_evidence', [
+  return writeContract(account, 'add_evidence', [
     params.case_id, params.title, params.evidence_type, params.url,
     params.evidence_hash, params.source_name, params.source_credibility,
     params.relevance, params.related_task_ids, params.related_plan_ids, params.category,
   ]);
 }
 
-export async function requestVerdikt(caseId: number) {
-  return writeContract('request_verdikt', [caseId]);
+export async function requestVerdikt(account: `0x${string}`, caseId: number) {
+  return writeContract(account, 'request_verdikt', [caseId]);
 }
 
 export async function getCaseCount(): Promise<number> {
@@ -131,9 +131,7 @@ export async function listAllCases(): Promise<any[]> {
     try {
       const summary = await getCaseSummary(i);
       summaries.push({ ...summary, case_id: i });
-    } catch {
-      // skip failed reads
-    }
+    } catch {}
   }
   return summaries;
 }

@@ -2,6 +2,7 @@
 
 import { useEffect, useState, useCallback } from 'react';
 import { useParams } from 'next/navigation';
+import { useAccount } from 'wagmi';
 import Link from 'next/link';
 import { getFullCase, requestVerdikt } from '@/lib/contract-service';
 import { saveTxHash } from '@/lib/tx-store';
@@ -12,6 +13,7 @@ import { Shield, ArrowLeft, Loader2 } from 'lucide-react';
 export default function ReviewPage() {
   const { caseId } = useParams() as { caseId: string };
   const numId = Number(caseId);
+  const { address, isConnected } = useAccount();
   const [data, setData] = useState<FullCaseData | null>(null);
   const [loading, setLoading] = useState(true);
   const [reviewing, setReviewing] = useState(false);
@@ -31,9 +33,10 @@ export default function ReviewPage() {
   }, [data?.case.status, loadCase]);
 
   async function handleReview() {
+    if (!isConnected || !address) { setError('Connect wallet to continue'); return; }
     setReviewing(true);
     try {
-      const hash = await requestVerdikt(numId);
+      const hash = await requestVerdikt(address, numId);
       if (hash) saveTxHash(caseId, 'review', hash as string);
       await loadCase();
     } catch (e: unknown) { setError(e instanceof Error ? e.message : 'Failed'); }
