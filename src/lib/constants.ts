@@ -16,7 +16,7 @@ export function addressExplorerUrl(address: string): string {
   return `${EXPLORER_BASE}/address/${address}`;
 }
 
-export const WORKER_BASE_URL = process.env.NEXT_PUBLIC_WORKER_URL ?? 'https://ops-signal-adapter.workers.dev';
+export const WORKER_BASE_URL = process.env.NEXT_PUBLIC_WORKER_URL ?? 'https://ops-signal-adapter.delealufejoel.workers.dev';
 
 export const CASE_STATUSES = [
   'DRAFT', 'SUBMITTED', 'SNAPSHOT_REGISTERED', 'TASKS_REGISTERED',
