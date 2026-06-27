@@ -9,7 +9,7 @@ import { WalletIdentityPlate } from '@/components/pressure-deck';
 import { Shield, ArrowLeft, Zap, Loader2 } from 'lucide-react';
 
 const DEMO = {
-  title: 'Evening Outbound Pressure — NorthDock Hub',
+  title: 'Evening Outbound Pressure - NorthDock Hub',
   facility_name: 'NorthDock Fulfillment Hub',
   facility_type: 'E-commerce fulfillment centre',
   shift_name: 'Evening outbound pressure shift',

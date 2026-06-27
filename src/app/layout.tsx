@@ -3,7 +3,7 @@ import './globals.css';
 import { Providers } from '@/components/providers';
 
 export const metadata: Metadata = {
-  title: 'OpsVerdikt Protocol — Decentralized Consensus for High-Pressure Operations',
+  title: 'OpsVerdikt Protocol - Decentralized Consensus for High-Pressure Operations',
   description: 'Resolve operational pressure before it becomes failure. GenLayer-powered consensus for defensible labor decisions.',
 };
 

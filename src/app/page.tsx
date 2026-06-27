@@ -37,7 +37,7 @@ export default function Home() {
 
             <p className="text-lg text-text-secondary max-w-2xl mx-auto leading-relaxed">
               OpsVerdikt converts high-pressure shift conditions, competing task priorities, labor constraints,
-              and public evidence into a defensible on-chain Ops Verdikt — powered by GenLayer consensus.
+              and public evidence into a defensible on-chain Ops Verdikt, powered by GenLayer consensus.
             </p>
 
             <div className="flex flex-col sm:flex-row items-center justify-center gap-3 pt-4">

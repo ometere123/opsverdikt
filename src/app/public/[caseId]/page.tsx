@@ -38,7 +38,7 @@ export default function PublicCasePage() {
         </div>
         <div className="bg-panel-steel/30 rounded-lg border border-border-line p-4 space-y-2 text-sm">
           <p><span className="text-muted-steel">Objective:</span> <span className="text-text-secondary">{c.business_objective}</span></p>
-          <p><span className="text-muted-steel">Workers:</span> <span className="text-text-secondary">{c.available_workers} — {c.worker_skill_summary}</span></p>
+          <p><span className="text-muted-steel">Workers:</span> <span className="text-text-secondary">{c.available_workers} - {c.worker_skill_summary}</span></p>
           <p><span className="text-muted-steel">Status:</span> <span className="font-mono text-electric-blue">{c.status}</span></p>
         </div>
         <TaskSeverityStack tasks={data.tasks} />

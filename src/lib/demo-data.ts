@@ -1,6 +1,6 @@
 export const DEMO_CASE = {
   case_id: 'case_northdock_001',
-  case_title: 'Evening Outbound Pressure — NorthDock Hub',
+  case_title: 'Evening Outbound Pressure - NorthDock Hub',
   facility_name: 'NorthDock Fulfillment Hub',
   facility_type: 'E-commerce fulfillment centre',
   shift_name: 'Evening outbound pressure shift',

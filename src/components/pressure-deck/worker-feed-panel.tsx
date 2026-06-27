@@ -72,7 +72,7 @@ export function WorkerFeedPanel() {
         {data && !loading && (
           <div className="relative">
             <div className="absolute top-0 right-0 flex items-center gap-1 text-[10px] text-signal-amber">
-              <AlertTriangle className="w-2.5 h-2.5" /> Signal only — not canonical
+              <AlertTriangle className="w-2.5 h-2.5" /> Signal only - not canonical
             </div>
             <pre className="font-mono text-[11px] text-text-secondary whitespace-pre-wrap overflow-auto max-h-48 mt-4">
               {JSON.stringify(data, null, 2)}

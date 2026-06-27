@@ -17,7 +17,7 @@ export function VerdictChamber({
     return (
       <div className="bg-deep-console border-t border-border-line p-8 text-center">
         <Shield className="w-8 h-8 text-muted-steel mx-auto mb-2" />
-        <p className="font-display text-sm text-muted-steel">Verdikt Chamber — Awaiting Consensus</p>
+        <p className="font-display text-sm text-muted-steel">Verdikt Chamber: Awaiting Consensus</p>
         <p className="text-xs text-muted-steel/70 mt-1">Submit all case data and request consensus review</p>
       </div>
     );
