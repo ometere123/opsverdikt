@@ -8,12 +8,6 @@ type EthereumProvider = {
   request(args: { method: string; params?: unknown[] }): Promise<unknown>;
 };
 
-declare global {
-  interface Window {
-    ethereum?: EthereumProvider;
-  }
-}
-
 function getWalletErrorCode(error: unknown): number | string | undefined {
   if (!error || typeof error !== 'object') return undefined;
 
@@ -77,9 +71,10 @@ export function StudioNetAutoSwitch() {
       try {
         await switchChainAsync({ chainId: studioNet.id });
       } catch {
-        if (cancelled || !window.ethereum) return;
+        const eth = (window as any).ethereum as EthereumProvider | undefined;
+        if (cancelled || !eth) return;
         try {
-          await switchInjectedWallet(window.ethereum);
+          await switchInjectedWallet(eth);
         } catch (error) {
           console.warn('Could not auto-switch wallet to StudioNet', error);
         }
