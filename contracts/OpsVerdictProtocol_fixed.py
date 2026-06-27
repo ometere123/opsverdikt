@@ -221,14 +221,8 @@ class OpsVerdiktContract(gl.Contract):
         )
 
         self.cases[case_id] = case
-        self.case_tasks[case_id] = DynArray[u32]()
-        self.case_plans[case_id] = DynArray[u32]()
-        self.case_evidence[case_id] = DynArray[u32]()
-        self.case_verdikts[case_id] = DynArray[u32]()
 
         sender = gl.message.sender_address
-        if sender not in self.owner_cases:
-            self.owner_cases[sender] = DynArray[u32]()
         self.owner_cases[sender].append(case_id)
 
     @gl.public.write
