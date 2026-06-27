@@ -1,6 +1,5 @@
 'use client';
 
-import type { EvidenceRecord } from '@/lib/types';
 import { ExternalLink, FileText, Hash, Shield } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
@@ -12,7 +11,7 @@ const categoryColors: Record<string, string> = {
   INCIDENT_REPORT: 'text-critical-red',
 };
 
-export function EvidenceSignalBay({ evidence }: { evidence: EvidenceRecord[] }) {
+export function EvidenceSignalBay({ evidence }: { evidence: any[] }) {
   return (
     <div className="bg-dark-graphite border-t border-border-line">
       <div className="p-4 border-b border-border-line flex items-center justify-between">

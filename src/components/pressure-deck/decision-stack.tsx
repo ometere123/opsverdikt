@@ -1,13 +1,12 @@
 'use client';
 
-import type { LaborPlanOption } from '@/lib/types';
 import { LaborPlanTradeoffCard } from './labor-plan-tradeoff-card';
 
 export function DecisionStack({
   plans,
   recommendedPlanId,
 }: {
-  plans: LaborPlanOption[];
+  plans: any[];
   recommendedPlanId?: string;
 }) {
   return (

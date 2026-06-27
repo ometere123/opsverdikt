@@ -1,6 +1,5 @@
 'use client';
 
-import type { TaskRecord } from '@/lib/types';
 import { cn } from '@/lib/utils';
 import { FileText } from 'lucide-react';
 
@@ -11,7 +10,7 @@ const impactColors: Record<string, string> = {
   LOW: 'border-l-system-green',
 };
 
-export function TaskSeverityStack({ tasks }: { tasks: TaskRecord[] }) {
+export function TaskSeverityStack({ tasks }: { tasks: any[] }) {
   const sorted = [...tasks].sort((a, b) => {
     const order = ['CRITICAL', 'HIGH', 'MEDIUM', 'LOW'];
     return order.indexOf(a.SLA_impact) - order.indexOf(b.SLA_impact);

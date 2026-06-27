@@ -1,14 +1,13 @@
 'use client';
 
 import { cn } from '@/lib/utils';
-import type { LaborPlanOption } from '@/lib/types';
 import { CheckCircle, AlertTriangle, Target } from 'lucide-react';
 
 export function LaborPlanTradeoffCard({
   plan,
   isRecommended = false,
 }: {
-  plan: LaborPlanOption;
+  plan: any;
   isRecommended?: boolean;
 }) {
   return (

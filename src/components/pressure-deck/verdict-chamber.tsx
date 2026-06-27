@@ -1,6 +1,5 @@
 'use client';
 
-import type { OpsVerdict } from '@/lib/types';
 import { cn } from '@/lib/utils';
 import { RiskBand } from './risk-band';
 import { ConsensusMeter } from './consensus-meter';
@@ -11,7 +10,7 @@ export function VerdictChamber({
   verdict,
   txHash,
 }: {
-  verdict: OpsVerdict | null;
+  verdict: Record<string, any> | null;
   txHash?: string;
 }) {
   if (!verdict) {
